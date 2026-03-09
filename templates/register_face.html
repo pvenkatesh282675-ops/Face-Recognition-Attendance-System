@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="glass-card">
+            <h2 class="mb-4">Register Face ID</h2>
+            <p class="text-muted">Phase 1: Identity Registration. Look straight into the camera.</p>
+
+            <div class="camera-container mb-4">
+                <video id="video-preview" autoplay muted playsinline></video>
+                <div class="scan-overlay"></div>
+                <div id="status-text" class="mt-2 font-weight-bold text-primary"></div>
+            </div>
+
+            <button id="capture-btn" class="btn btn-custom btn-lg w-100 mb-3" disabled>
+                Scan My Face
+            </button>
+            <p class="small text-muted">Position your face within the circle</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script>
+    const video = document.getElementById('video-preview');
+    const captureBtn = document.getElementById('capture-btn');
+    const statusText = document.getElementById('status-text');
+    const csrfToken = window.getCsrfToken();
+    const MODEL_URLS = [
+        'https://justadudewhohacks.github.io/face-api.js/models',
+        'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights'
+    ];
+    let streamReady = false;
+    let modelReady = false;
+
+    function updateCaptureState() {
+        captureBtn.disabled = !(streamReady && modelReady);
+    }
+
+    async function loadModels() {
+        statusText.innerText = "Loading AI models...";
+        let lastError = null;
+
+        for (const modelUrl of MODEL_URLS) {
+            try {
+                await faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl);
+                await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
+                await faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl);
+                modelReady = true;
+                statusText.innerText = "AI models loaded. Ready to scan.";
+                updateCaptureState();
+                return;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+
+        console.error("Model load failure:", lastError);
+        statusText.innerText = "Model load failed. Refresh and try again.";
+        statusText.className = "mt-2 font-weight-bold text-danger";
+        modelReady = false;
+        updateCaptureState();
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusText.innerText = "Camera API not available in this browser.";
+        statusText.className = "mt-2 font-weight-bold text-danger";
+    } else {
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            streamReady = true;
+            updateCaptureState();
+            loadModels();
+        })
+        .catch(err => {
+            console.error("Camera error:", err);
+            statusText.innerText = "Camera access denied. Allow camera and reload.";
+            statusText.className = "mt-2 font-weight-bold text-danger";
+            streamReady = false;
+            updateCaptureState();
+        });
+    }
+
+    captureBtn.addEventListener('click', async () => {
+        if (!streamReady || !modelReady) {
+            return;
+        }
+        statusText.innerText = "Scanning Face...";
+        captureBtn.disabled = true;
+
+        const detections = await faceapi.detectSingleFace(video)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+        if (!detections) {
+            statusText.innerText = "No face detected. Please adjust lighting.";
+            captureBtn.disabled = false;
+            return;
+        }
+
+        const descriptor = Array.from(detections.descriptor);
+
+        try {
+            const response = await fetch('/save_face', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ descriptor: descriptor })
+            });
+            const result = await response.json().catch(() => ({
+                success: false,
+                message: "Unexpected server response."
+            }));
+
+            if (result.success) {
+                statusText.innerText = "Face Registered Successfully!";
+                statusText.className = "mt-2 font-weight-bold text-success";
+                setTimeout(() => window.location.href = '/dashboard', 1500);
+            } else {
+                statusText.innerText = result.message || "Face registration failed.";
+                statusText.className = "mt-2 font-weight-bold text-danger";
+                captureBtn.disabled = false;
+            }
+        } catch (error) {
+            statusText.innerText = "Upload error. Try again.";
+            captureBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}

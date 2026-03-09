@@ -216,7 +216,7 @@ Admin Flow: Monitor System → View Analytics → Manage Users → Audit Logs
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/rajpratham1/Face-Recognition-Attendance-System.git
+git clone https://github.com/pvenkatesh282675-ops/Face-Recognition-Attendance-System.git
 cd Face-Recognition-Attendance-System
 ```
 
@@ -294,7 +294,7 @@ brew install python@3.9
 
 #### Step 2: Clone and Setup
 ```bash
-git clone https://github.com/rajpratham1/Face-Recognition-Attendance-System.git
+git clone https://github.com/pvenkatesh282675-ops/Face-Recognition-Attendance-System.git
 cd Face-Recognition-Attendance-System
 
 # Create virtual environment
@@ -1041,9 +1041,9 @@ SOFTWARE.
 
 ## 👥 Authors & Contributors
 
-- **IIOT Group Project Team** - *Initial work* - [GitHub](https://github.com/rajpratham1)
+- **IIOT Group Project Team** - *Initial work* - [GitHub](https://github.com/pvenkatesh282675-ops)
 
-See also the list of [contributors](https://github.com/rajpratham1/Face-Recognition-Attendance-System/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/pvenkatesh282675-ops/Face-Recognition-Attendance-System/contributors) who participated in this project.
 
 ---
 
@@ -1059,8 +1059,8 @@ See also the list of [contributors](https://github.com/rajpratham1/Face-Recognit
 ## 📞 Contact & Support
 
 - **Email**: support@invertis.org
-- **Issues**: [GitHub Issues](https://github.com/rajpratham1/Face-Recognition-Attendance-System/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rajpratham1/Face-Recognition-Attendance-System/discussions)
+- **Issues**: [GitHub Issues](https://github.com/pvenkatesh282675-ops//Face-Recognition-Attendance-System/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/pvenkatesh282675-ops/Face-Recognition-Attendance-System/discussions)
 
 ---
 
